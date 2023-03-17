@@ -8,6 +8,7 @@ import committee.nova.skillful.impl.skill.instance.SkillInstance;
 import committee.nova.skillful.storage.SkillfulStorage.SkillRegisterEvent;
 import committee.nova.skillful.util.Utilities;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.BossInfo;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +25,7 @@ import java.util.Random;
 @Mod(modid = SkillsCGM.MODID)
 public class SkillsCGM {
     public static final String MODID = "skillscgm";
+    private static final String DISPERSION = "dispersionSet";
     public static final ISkill FIREARM_CGM = new Skill(new ResourceLocation(MODID, "firearm"), 100, BossInfo.Color.BLUE, (int i) -> i * 200);
 
     @EventHandler
@@ -65,11 +67,13 @@ public class SkillsCGM {
         final SkillInstance firearm = Utilities.getPlayerSkillStat(shooter, FIREARM_CGM);
         if (firearm.getCurrentLevel() > 20) return;
         final int dispersion = 21 - firearm.getCurrentLevel();
-        if (bullet.getEntityData().getBoolean("dispersionSet")) return;
+        final NBTTagCompound data = bullet.getEntityData();
+        if (data.getBoolean(DISPERSION)) return;
         final Random rand = shooter.getRNG();
         if (rand.nextInt(Math.max(dispersion, 11)) < 5) return;
         bullet.motionX += dispersion * (rand.nextDouble() - 0.5) * 0.025;
         bullet.motionY += dispersion * (rand.nextDouble() - 0.5) * 0.025;
         bullet.motionZ += dispersion * (rand.nextDouble() - 0.5) * 0.025;
+        data.setBoolean(DISPERSION, true);
     }
 }
