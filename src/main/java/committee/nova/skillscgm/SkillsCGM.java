@@ -7,6 +7,8 @@ import committee.nova.skillful.impl.skill.Skill;
 import committee.nova.skillful.impl.skill.instance.SkillInstance;
 import committee.nova.skillful.storage.SkillfulStorage.SkillRegisterEvent;
 import committee.nova.skillful.util.Utilities;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -46,7 +48,8 @@ public class SkillsCGM {
         final EntityPlayerMP player = (EntityPlayerMP) s.getTrueSource();
         final SkillInstance firearm = Utilities.getPlayerSkillStat(player, FIREARM_CGM);
         event.setAmount(event.getAmount() * (1.0F + Math.max(.0F, (firearm.getCurrentLevel() - 10.0F) / 50.0F)));
-        firearm.addXp(player, 1);
+        final EntityLivingBase target = event.getEntityLiving();
+        firearm.addXp(player, Math.max(1, (int) (event.getAmount() * 1.08 / target.width / target.height * target.getAIMoveSpeed() * (target instanceof EntityMob ? 1.0 : 0.25))));
     }
 
     @SubscribeEvent
@@ -55,7 +58,7 @@ public class SkillsCGM {
         final DamageSourceProjectile s = (DamageSourceProjectile) event.getSource();
         if (!(s.getTrueSource() instanceof EntityPlayerMP)) return;
         final EntityPlayerMP player = (EntityPlayerMP) s.getTrueSource();
-        Utilities.getPlayerSkillStat(player, FIREARM_CGM).addXp(player, 5);
+        Utilities.getPlayerSkillStat(player, FIREARM_CGM).addXp(player, 5 + (int) (event.getEntityLiving().getMaxHealth() / 20.0));
     }
 
     @SubscribeEvent
